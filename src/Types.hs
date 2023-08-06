@@ -12,15 +12,15 @@ import Data.Time as X (UTCTime)
 import Data.Text as X (Text)
 import Deriving.Aeson
 import Deriving.Aeson.Stock
-import Mig (FromText)
+import Mig (FromHttpApiData)
 
 type Url = String
 
 newtype MessageId = MessageId { unMessageId :: Int }
-  deriving newtype (ToJSON, FromJSON, Show, Eq, Ord, FromText)
+  deriving newtype (ToJSON, FromJSON, Show, Eq, Ord, FromHttpApiData)
 
 newtype Tag = Tag { unTag :: Text }
-  deriving newtype (ToJSON, FromJSON, Show, Eq, FromText)
+  deriving newtype (ToJSON, FromJSON, Show, Eq, FromHttpApiData)
 
 data Message = Message
   { content :: Text
@@ -31,5 +31,5 @@ data Message = Message
   deriving (FromJSON, ToJSON) via Vanilla Message
 
 newtype ApiError = ApiError Text
-  deriving newtype (ToJSON, FromJSON, Show, Eq, FromText)
+  deriving newtype (ToJSON, FromJSON, Show, Eq, FromHttpApiData)
 
