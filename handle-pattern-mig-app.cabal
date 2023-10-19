@@ -41,6 +41,7 @@ library
       src
   default-extensions:
       DataKinds
+      DeriveAnyClass
       DeriveGeneric
       DerivingVia
       DuplicateRecordFields
@@ -57,7 +58,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , deriving-aeson
-    , mig
+    , mig-server
     , text
     , time
   default-language: GHC2021
@@ -77,6 +78,7 @@ executable handle-pattern-mig-app-exe
       app
   default-extensions:
       DataKinds
+      DeriveAnyClass
       DeriveGeneric
       DerivingVia
       DuplicateRecordFields
@@ -96,7 +98,7 @@ executable handle-pattern-mig-app-exe
     , deriving-aeson
     , handle-pattern-mig-app
     , immortal
-    , mig
+    , mig-server
     , mtl
     , optparse-applicative
     , stm
@@ -115,6 +117,7 @@ test-suite handle-pattern-mig-app-test
       test
   default-extensions:
       DataKinds
+      DeriveAnyClass
       DeriveGeneric
       DerivingVia
       DuplicateRecordFields
@@ -132,7 +135,7 @@ test-suite handle-pattern-mig-app-test
     , bytestring
     , deriving-aeson
     , handle-pattern-mig-app
-    , mig
+    , mig-server
     , text
     , time
   default-language: GHC2021

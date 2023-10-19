@@ -5,7 +5,6 @@ module Server
   ) where
 
 import Mig.Json.IO
-import Data.Bifunctor
 import Server.GetMessage qualified as GetMessage
 import Server.ListTag    qualified as ListTag
 import Server.Save       qualified as Save
@@ -24,23 +23,23 @@ data Env = Env
 -- | Mig server for the app
 server :: Env -> Server IO
 server env =
-  "api" /. "v1" /.
+  "api/v1" /.
     mconcat
       [ "save" /. handleSave
-      , "get" /. "message" /. handleGetById
-      , "list" /. "tag" /. handleGetByTag
+      , "get/message" /. handleGetById
+      , "list/tag" /. handleGetByTag
       , "toggle-logs" /. handleToggleLogs
       ]
   where
-    handleSave :: Body SaveRequest -> Post SaveResponse
-    handleSave (Body req) = Post $ Save.handle env.save req
+    handleSave :: Body SaveRequest -> Post (Resp SaveResponse)
+    handleSave (Body req) = Send $ fmap ok $ Save.handle env.save req
 
-    handleGetById :: Capture MessageId -> Get (Either (Error ApiError) Message)
-    handleGetById (Capture messageId) = Get $
-      first (Error status400) <$> GetMessage.handle env.getMessage messageId
+    handleGetById :: Capture "message-id" MessageId -> Get (RespOr ApiError Message)
+    handleGetById (Capture messageId) = Send $
+      either (bad status400) ok <$> GetMessage.handle env.getMessage messageId
 
-    handleGetByTag :: Capture Tag -> Get [Message]
-    handleGetByTag (Capture tag) = Get $ ListTag.handle env.listTag tag
+    handleGetByTag :: Capture "tag" Tag -> Get (Resp [Message])
+    handleGetByTag (Capture tag) = Send $ fmap ok $ ListTag.handle env.listTag tag
 
-    handleToggleLogs :: Post ()
-    handleToggleLogs = Post $ ToggleLog.handle env.toggleLogs
+    handleToggleLogs :: Post (Resp ())
+    handleToggleLogs = Send $ fmap ok $ ToggleLog.handle env.toggleLogs

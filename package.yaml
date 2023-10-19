@@ -28,10 +28,11 @@ dependencies:
 - deriving-aeson
 - time
 - text
-- mig
+- mig-server
 
 default-extensions:
   - DataKinds
+  - DeriveAnyClass
   - DeriveGeneric
   - DerivingVia
   - DuplicateRecordFields
