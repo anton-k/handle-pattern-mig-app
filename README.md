@@ -392,21 +392,20 @@ import Mig.Json.IO
 -- | Mig server for the app
 server :: Env -> Server IO
 server env =
-  "api" /. "v1" /.
-    mconcat
-      [ "save" /. handleSave
-      , "get" /. "message" /. handleGetById
-      , "list" /. "tag" /. handleGetByTag
-      , "toggle-logs" /. handleToggleLogs
-      ]
+  "api/v1" /.
+    [ "save" /. handleSave
+    , "get/message" /. handleGetById
+    , "list/tag" /. handleGetByTag
+    , "toggle-logs" /. handleToggleLogs
+    ]
   where
-    handleSave :: Body SaveRequest -> Post SaveResponse
+    handleSave :: Body SaveRequest -> Post (Resp SaveResponse)
 
-    handleGetById :: Capture MessageId -> Get (Either (Error ApiError) Message)
+    handleGetById :: Capture "message-id" MessageId -> Get (RespOr ApiError Message)
 
-    handleGetByTag :: Capture Tag -> Get [Message]
+    handleGetByTag :: Capture "tag" Tag -> Get (Resp [Message])
 
-    handleToggleLogs :: Post ()
+    handleToggleLogs :: Post (Resp ())
 ```
 
 We define API-routes and at the leafs of the API-tree we use functions
@@ -430,25 +429,19 @@ functions from `Env` data type:
 
 ```haskell
   where
-    handleSave :: Body SaveRequest -> Post SaveResponse
-    handleSave (Body req) = Post $ Save.handle env.save req
+    handleSave :: Body SaveRequest -> Post (Resp SaveResponse)
+    handleSave (Body req) = Send $ fmap ok $ Save.handle env.save req
 
-    handleGetById :: Capture MessageId -> Get (Either (Error ApiError) Message)
-    handleGetById (Capture messageId) = Get $
-      first (Error status400) <$> GetMessage.handle env.getMessage messageId
+    handleGetById :: Capture "message-id" MessageId -> Get (RespOr ApiError Message)
+    handleGetById (Capture messageId) = Send $
+      either (bad status400) ok <$> GetMessage.handle env.getMessage messageId
 
-    handleGetByTag :: Capture Tag -> Get [Message]
-    handleGetByTag (Capture tag) = Get $ ListTag.handle env.listTag tag
+    handleGetByTag :: Capture "tag" Tag -> Get (Resp [Message])
+    handleGetByTag (Capture tag) = Send $ fmap ok $ ListTag.handle env.listTag tag
 
-    handleToggleLogs :: Post ()
-    handleToggleLogs = Post $ ToggleLog.handle env.toggleLogs
+    handleToggleLogs :: Post (Resp ())
+    handleToggleLogs = Send $ fmap ok $ ToggleLog.handle env.toggleLogs
 ```
-
-#### Custom error messages
-
-For simplicity we use plain `Text` error messages but in real app 
-we should define more fine grained type for `ApiError` that we can convert 
-to mig errors.
 
 ### Implement interfaces outside of the library
 
